@@ -1,6 +1,7 @@
 <!-- _coverpage.md -->
 
 ![logo_ todo](_media/IMG_0002.png)
+
 # Personal study notes
 
 > Persional notes website, giving me a chance to study anywhere
