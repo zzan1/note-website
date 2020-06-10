@@ -4,4 +4,9 @@
 
 - [🖥️ **JavaScript**](javascript/README.md)
 
-  - [JavaScript 高级程序设计](javascript/advance-javascript/basic-statement.md)
+  - [JavaScript 基础语法](javascript/basic-javascript/basic-statement.md)
+  - [JavaScript 高级设计](javascript/advanced-javascript/advance-javascript.md)
+  
+
+
+
