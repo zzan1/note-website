@@ -66,6 +66,8 @@ ECMA-262 第 5 版定义了只有内部使用的**特性**, 用来描述属性�
   3. 只指定 setter 不能读;
   4. 单设置一个严格模式下报错.
 
+#### 二者之间的差别
+
 [深入理解这数据属性和访问器属性](https://www.zhihu.com/question/295168343)
 
 ```javascript
@@ -191,12 +193,12 @@ console.log(book.edition);
 
 5. 组合使用原型模式和构造函数
 
-可以将共享的属性放到原型中定义, 把实例自己单独的属性放到构造函数中定义. 组合形式是注意使用的方式.
+	可以将共享的属性放到原型中定义, 把实例自己单独的属性放到构造函数中定义. 组合形式是注意使用的方式.
 
 6. 动态原型模式
 
-```javascript
-const BookTwo = function (name, edition) {
+	```javascript
+	const BookTwo = function (name, edition) {
 	this.name = name;
 	this.edition = edition;
 	this.getEdition = function () {
@@ -208,12 +210,12 @@ const BookTwo = function (name, edition) {
 			return this.name;
 		};
 	}
-};
-```
+	};
+	```
 
-不是重写原型函数, 之前定义的还在. 可以在第一次 new 时, **初始化**一个原型属性.
+	不是重写原型函数, 之前定义的还在. 可以在第一次 new 时, **初始化**一个原型属性.
 
-这么写, 会报错, 因为 `this.getName` 并没有声明, 却已经用来判断类型了
+	这么写, 会报错, 因为 `this.getName` 并没有声明, 却已经用来判断类型了
 
 7. 寄生函数构造函数形式
    ````javascript
@@ -227,26 +229,35 @@ const BookTwo = function (name, edition) {
 	}
    ````
 
-寄生构造函数, 和工厂函数几乎一样, 除了使用 `new` 来创建对象. 它的作用是: **利用工厂模式的函数来封装对象, 用 new 来改变 this 的指向.**
+	寄生构造函数, 和工厂函数几乎一样, 除了使用 `new` 来创建对象. 它的作用是: **利用工厂模式的函数来封装对象, 用 new 来改变 this 的指向.**
 
-1. 稳妥构造函数模式
+	缺点依旧是: 人不人, 猫不猫
+8. 稳妥构造函数模式
 
-没有公共属性, 不使用 `this` 对象, 也不使用 `new` 来指定 this 对象.
+	没有公共属性, 不使用 `this` 对象, 也不使用 `new` 来指定 this 对象.
 
-目的: 防止外界更改自己的属性. 如下, 外界永远都不可能改变 `name` 和 `edition`
+	目的: 防止外界更改自己的属性. 如下, 外界永远都不可能改变 `name` 和 `edition`
 
-```javascript
-function Book(name, edition){
-  let o = new Array();
-  let name = name;
-  let edition = edition;
-  o.getEdition= function(){
-    return edition;
-  }
-  return o
-}
-Const book1 = Book("Dom", "2005")
-```
+	```javascript
+	function Book(name, edition){
+		let o = new Array();
+		let name = name;
+		let edition = edition;
+		o.getEdition= function(){
+			return edition;
+		}
+		return o
+	}
+	Const book1 = Book("Dom", "2005")
+	```
+
+**总结** 
+
+- 如果需要创建一个单例对象, 使用 **字面量** 来定义;
+
+- 如果需要多个实例对象, 并且没有共享属性, 那么就 **构造函数**; 
+
+- 如果有属性共享, 就把属性定义到 **原型对象** 上去.
 
 ### 理解原型对象
 
@@ -265,7 +276,7 @@ console.log(Object.getOwnPropertyNames(Book));
 
 此后, 原型对象会继承它父类(如果有)的方法和属性.
 
-创建一个实例后, 它会有一个指针指向原型对象. 没有标准方式访问, 浏览器有一个 `Object.getPrototypeOf()` 可以访问. 可以用 `isPrototypeOf()` (方法, 不是关键字)来看它和一个原型对象的关系.
+创建一个实例后, 它会有一个指针 `__proto__` 指向原型对象. 没有标准方式访问, 浏览器有一个 `Object.getPrototypeOf()` 可以访问. 可以用 `isPrototypeOf()` (方法, 不是关键字)来看它和一个原型对象的关系.
 
 #### 解释器查找属性的顺序
 
@@ -338,7 +349,7 @@ console.log(Book.constructor);
 
 重写 prototype:
 
-1. 写不写 constructor 没有影响, 会自己补;
+1. 写不写 constructor 没有影响, 它已经是一个历史的产物了, 没什么作用了. 他不会影响 `instanceof` 的结果; 
 2. 重写之前的实例: 不会继承, 不改变, `instanceof` `isPrototypeOf` 均改变;
 3. 之后的实例, 一切正常
 
@@ -348,7 +359,7 @@ console.log(Book.constructor);
 
 大多数语言都支持两种继承方式：接口继承和实现继承。接口继承只继承方法签名，而实现继承则继承实际的方法。
 
-- [ ] 两种继承方式
+- [ ] 两种继承方式的了解
 
 ECMAScript 只支持实现继承, 并且实现继承主要依靠原型链来实现.
 
@@ -357,12 +368,14 @@ ECMAScript 只支持实现继承, 并且实现继承主要依靠原型链来实�
 主要思想: 让子对象的原型对象等于父对象的实例
 
 ```javascript
+	Book.prototype = new SuperBook()
 ```
 
-继承完之后:
+继承完之后(要明白它们这些属性什么时候进入实例, 在哪里存储):
 
-1. 父对象的构造函数里定义的属性也被继承;
-2. 子对象的构造函数定义的属性仍然存在;
+1. 父对象的构造函数的属性, 在 `new` 的过程中进入到了子类的原型对象中;
+2. 子对象的构造函数定义的属性在使用 `new` 时在实例中创建相应的属性;
+3. 父对象的原型属性由子对象的原型对象中的 `__proto__` 指向;
 3. 子对象的原型被重写, 所以继承之前定义的原型属性不存在了;
 4. 实例 `instanceof`, `isPrototypeOf` 均为 true;
 5. 继承完之后, 不能再用字面量的方法更改原型对象了, 因为这会重写原型对象, 打破原型链.
@@ -392,7 +405,7 @@ console.log(book1.list, book2.list);
 //[ 12, 12, 31 ] [ 12, 12, 31 ]
 ```
 
-原型链的第二个问题是：**在创建子类型的实例时，不能向超类型的构造函数中传递参数**.
+原型链的第二个问题是：**在创建子类型的实例时，不能向父类的构造函数中传递参数**. 因为`new SuperType()` 是直接在子类的原型上的, 如果传递一个参数, 则子类的所有的实例这部分属性是一样的.
 
 #### 借用构造函数
 
@@ -415,7 +428,7 @@ console.log(book1.list === book2.list);
 
 这种技术的思想很简单: **在子类型构造函数中调用父类的构造函数**. 当创建实例时, 会绑定不同的 `this` 的对象, 然后就避免了继承时引用类型使用相同的内存地址的为题.
 
-但问题是: 父类只能是一个函数, 父类的原型属性无法通过 `this` 来绑定.
+但问题是: 父类只能是一个函数, 并且父类的原型属性无法通过 `this` 来绑定, 仍然不能使用引用类型的值.
 
 **为什么只能是函数呢?** 函数是**在特定执行环境中执行代码的对象**, 因此可以通过 `call` `apply` 来通过绑定不同的执行环境来实现创建不同的对象.
 
@@ -452,7 +465,7 @@ console.log(
 // true true
 ```
 
-把原型链和构造函数继承结合起来, 虽然解决了一部分问题, 但是, 现在还是不能在原型函数中定义引用类型的值, 其实也不需要了.
+把原型链和构造函数继承结合起来. 使用 `SuperType.call(this)` 解决原型链的两个问题.
 
 #### 不是继承的对象复制: 原型式继承
 
@@ -462,11 +475,10 @@ function obj(base) {
 	NewObj.prototype = base;
 	return new NewObj();
 }
+SubType.prototype = obj(SuperType.prototype)
 ```
 
-与原型链继承的方式位移差别是: 不是新建一个实例, 而是重写原型对象.
-
-这只是实现了新对象的复制, 重新创建了一个和 base 一样属性的对象. 这个复制不是直接 `=`, 两个是不同的内寸地址.
+思想是: 既然 `SubType.prototype = new SuperType()` 中创建 `SuperType.call(this)` 同样的属性, 而且前面只是复制一下原型链, 副作用是 `new` 引起的. 那么我就在中间插入一个没有构造函数属性的对象, 只是单纯的复制一下原型链.
 
 现在可以使用 `Object.create()` 来实现上面这个函数. 第一个参数就是 `baseObj`, 传递一个想要复制的对象. 第二个参数可以新增加属性, 格式像 `Object.defineProperty()` 第二个参数一样, 需要指定特性;
 
@@ -477,84 +489,6 @@ function obj(base) {
 #### 寄生组合式继承
 
 **组合式继承的缺点**: 在第一次调用 SuperType 构造函数时，SubType.prototype 会得到两个属性：name 和 colors；它们都是 SuperType 的实例属性，只不过现在位于 SubType 的原型中。当调用 SubType 构造函数时，又会调用一次 SuperType 构造函数，这一次又在新对象上创建了实例属性 name 和 colors。于是，这两个属性就屏蔽了原型中的两个同名属性. 有两组 name 和 colors 属性：一组在实例上，一组在 SubType 原型中。
-
-```javascript
-function object(base) {
-	function NewObj() {}
-	NewObj.prototype = base;
-	return new NewObj();
-}
-// 寄生式继承的实现,
-function inheritPrototype(baseObj, fatherObj) {
-	let prototype = object(fatherObj.prototype);
-	baseObj.prototype = prototype;
-}
-function SuperType() {
-	this.name = "yi";
-}
-SuperType.prototype.sayName = function () {
-	console.log(this.name);
-};
-
-console.log(
-	SuperType.prototype.constructor,
-	Object.getOwnPropertyNames(SuperType.prototype)
-);
-//[Function: SuperType] [ 'constructor', 'sayName' ]
-
-let book1 = new SuperType();
-console.log(Object.getOwnPropertyNames(book1));
-// ['name']
-
-function SubType() {
-	SuperType.call(this);
-	this.edition = "23";
-}
-// 第一个点
-SubType.prototype = new SuperType();
-
-console.log(
-	Object.getOwnPropertyNames(SubType.prototype),
-	SubType.prototype.constructor
-);
-//['name'] [Function: SuperType]
-console.log(SubType.prototype === SuperType.prototype);
-// false
-
-let book2 = new SubType();
-console.log(Object.getOwnPropertyNames(book2));
-//[ 'name', 'edition' ]
-
-SubType.prototype = SuperType.prototype;
-console.log(
-	Object.getOwnPropertyNames(SubType.prototype),
-	SubType.prototype.constructor
-);
-//[ 'constructor', 'sayName' ] [Function: SuperType]
-console.log(SubType.prototype === SuperType.prototype);
-// true
-
-let book3 = new SubType();
-console.log(Object.getOwnPropertyNames(book3));
-//[ 'name', 'edition' ]
-
-// 第二个点
-SubType.prototype = object(SuperType.prototype);
-console.log(
-	Object.getOwnPropertyNames(SubType.prototype),
-	SubType.prototype.constructor
-);
-//[] [Function: SuperType]
-console.log(SubType.prototype === SuperType.prototype);
-// false
-let book4 = new SubType();
-console.log(Object.getOwnPropertyNames(book4));
-//[ 'name', 'edition' ]
-```
-
-寄生组合式继承改变原型链的缺点了吗?
-
-解决了. **传递参数:** 通过在子类中调用 `call` 可以解决向父类构造函数中传递参数. **引用类型的值**, `call` 函数已经为不同的引用类型的值绑定了不同的对象. **重复定义属性**, 因为现在不再执行 `new SuperType()` 而是直接将 `SuperType.prototype` , 复制给了中间对象的原型对象. 没用 `new` 再次执行构造函数的过程了.
 
 一个完整的寄生式组合继承
 
@@ -581,14 +515,15 @@ function SubType(age, name, list) {
 inheritPrototype(SubType, SuperType);
 ```
 
-1. 从第一个点和第二个点可以看出: 原型链继承(组合继承)原型函数中仍定义了一个 `name`, 重复定义了两次. 寄生式继承(第二个点)原型函数中不存在重复定义. 原因是: `new` 只会执行后面的函数, 为新对象定义属性. 而寄生式继承的 `new` 的 `NewObj` 函数没有定义自己的属性. 组合继承的 `new` 重复定义了 `SubType()` 的 name 属性, 这个属性已经从它的实例继承来了.
-2. 构造函数就只是一个函数对象. 它定义的属性只有 `new` 时才会到实例中.
-3. prototype 对象的属性在实例中不是显然存在, 是通过 `[[prototype]]` 特性链接的. 所以实例的这部分属性可以通过继承来改变.
-4. 动态手动的指定构造函数, 只是一种习惯. 他无法改变 Instanceof 的结果.
+寄生组合式继承改变原型链的缺点了吗?
+
+解决了. **传递参数:** 通过在子类中调用 `call` 可以解决向父类构造函数中传递参数. **引用类型的值**, `call` 函数已经为不同的引用类型的值绑定了不同的对象. **重复定义属性**, 因为现在不再执行 `new SuperType()` 而是直接将 `SuperType.prototype` , 复制给了中间对象的原型对象. 没用 `new` 再次执行构造函数的过程了.
 
 问题:
 
 1. `instanceOf` 和 `isPrototypeOf` 的工作原理是什么;
+	
+	都是依托原型链.
 
 ## 函数表达式
 
@@ -674,7 +609,8 @@ consoleName(book1, book2);
 consoleName = null;
 ```
 
-[需要记住的第三张图](https://cdn.jsdelivr.net/gh/zzan1/markdownPicture/normal/20200609195324.png)
+需要记住的图
+![](https://cdn.jsdelivr.net/gh/zzan1/markdownPicture/normal/20200609195324.png)
 
 另外, 闭包只能访问包裹函数变量的最后一个值. 因为它包含的变量对象里面只有一个变量, 这个变量不可能平白的被复制多个并且有不同的值.
 
@@ -818,7 +754,7 @@ person1 = new Person('Dom');
 
 显而易见, 这个 `name` 变量不可能被外部直接访问, 而是使用两个闭包函数来访问和设置它的值. 
 
-那么缺点是: 构造函数的缺点, 所有实例都有一样的方法, 有的可以共享, 太浪费内存了.
+那么缺点是: 构造函数的缺点, 人不人, 猫不猫.
 
 #### 私有作用域
 ```javascript
@@ -903,4 +839,6 @@ var singleInstance = (function() {
 
 直接返回一个实例.
 
+## 附上一个思维导图
 
+![](https://cdn.jsdelivr.net/gh/zzan1/markdownPicture/normal/面向对象的程序设计.png)
