@@ -11,5 +11,5 @@
 - Person thinking of life
 
 [My GitHub](https://github.com/zzan1)
-[My Blog](#)
+[My Blog](https://aatrox.ltd)
 [Get Start](README.md)
